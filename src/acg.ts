@@ -1,8 +1,6 @@
 import Stage from './Stage';
 import { RawElementConfig } from './types/RawElementConfig';
 
-export const acg = {
-  create(config: RawElementConfig): Stage {
-    return new Stage(config);
-  },
-};
+export function create(config: RawElementConfig): Stage {
+  return new Stage(config);
+}

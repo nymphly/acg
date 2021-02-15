@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint '*/**/*.{js,ts}' --quiet --fix"
+    "lint": "eslint '*/**/*.{js,ts}' --quiet --fix",
+    "tsc": "tsc",
+    "webpack": "webpack"
   },
   "author": "",
   "license": "ISC",

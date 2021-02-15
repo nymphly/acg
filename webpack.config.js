@@ -4,7 +4,7 @@ const path = require('path');
 module.exports = {
   mode: 'production',
   // mode: 'development',
-  entry: path.join(__dirname, 'src', 'index.ts'),
+  entry: path.join(__dirname, 'src', 'acg.ts'),
   // devtool: 'inline-source-map',
   module: {
     rules: [
@@ -22,8 +22,8 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
     libraryTarget: 'umd',
-    // umdNamedDefine: true,
-    // globalObject: "typeof window !== 'undefined' ? window : this"
+    umdNamedDefine: true,
+    globalObject: "typeof window !== 'undefined' ? window : this",
     library: 'acg',
     auxiliaryComment: 'Test Comment',
   },

@@ -1,4 +1,4 @@
-import { acg } from './acg';
+import { create } from './acg';
 
 const config = {
   tag: 'svg',
@@ -90,5 +90,5 @@ const config = {
 };
 
 console.log('asdf');
-const stage = acg.create(config);
+const stage = create(config);
 stage.render();
