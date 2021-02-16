@@ -1,10 +1,10 @@
-import ConfigWrapper from './ConfigWrapper';
+import ACGElement from './ACGElement';
 import { Nullable } from './types/Nullable';
 import { RawElementConfig } from './types/RawElementConfig';
 
 export default class Stage {
   #config: RawElementConfig;
-  #wrappers: Map<string, Nullable<ConfigWrapper>> = new Map();
+  #wrappers: Map<string, Nullable<ACGElement>> = new Map();
   #rawConfigs: Map<string, RawElementConfig> = new Map();
   #parents: Map<string, string | null> = new Map();
 
@@ -16,7 +16,7 @@ export default class Stage {
   parseConfig(config: RawElementConfig = this.#config, parentName: Nullable<string> = null): void {
     const { name, content } = config;
 
-    const wrapper: Nullable<ConfigWrapper> | undefined = this.#wrappers.get(name);
+    const wrapper: Nullable<ACGElement> | undefined = this.#wrappers.get(name);
 
     if (wrapper === undefined) {
       /*
@@ -47,8 +47,8 @@ export default class Stage {
     }
   }
 
-  find(name: string): ConfigWrapper | undefined {
-    const wrapper: Nullable<ConfigWrapper> | undefined = this.#wrappers.get(name);
+  find(name: string): ACGElement | undefined {
+    const wrapper: Nullable<ACGElement> | undefined = this.#wrappers.get(name);
     if (wrapper === null) {
       const parentName = this.#parents.get(name);
       const rawConfig = <RawElementConfig>this.#rawConfigs.get(name); // This config is not undefined here.
@@ -57,7 +57,7 @@ export default class Stage {
         Need to create a new wrapper, memoize it and return.
         Null value means that 'name' exists but is not created yet.
        */
-      const newWrapper = new ConfigWrapper(this, rawConfig, parentName);
+      const newWrapper = new ACGElement(this, rawConfig, parentName);
       this.#wrappers.set(name, newWrapper);
       return newWrapper;
     }
