@@ -5,7 +5,7 @@ module.exports = {
   mode: 'production',
   // mode: 'development',
   entry: path.join(__dirname, 'src', 'acg.ts'),
-  // devtool: 'inline-source-map',
+  devtool: 'inline-source-map',
   module: {
     rules: [
       {

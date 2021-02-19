@@ -1,6 +1,4 @@
-import { create } from './acg';
-
-const config = {
+export const twoLinesConfig: RawElementConfig = {
   tag: 'svg',
   name: 'Svg',
   attrs: {
@@ -88,7 +86,3 @@ const config = {
     },
   ],
 };
-
-console.log('asdf');
-const stage = create(config);
-stage.render();

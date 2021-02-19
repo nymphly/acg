@@ -1,5 +1,4 @@
-import Stage from './Stage';
-import { RawElementConfig } from './types/RawElementConfig';
+import Stage from './stage/Stage';
 
 export function create(config: RawElementConfig): Stage {
   return new Stage(config);
