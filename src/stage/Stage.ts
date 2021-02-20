@@ -1,4 +1,5 @@
-import ACGElement from '../ACGElement';
+import { ACGElement } from '../elements';
+import { render } from '../rendering';
 
 export default class Stage {
   /**
@@ -17,12 +18,31 @@ export default class Stage {
   #elements: Map<string, Nullable<ACGElement>> = new Map();
 
   /**
-   * Map that contains
+   * Map of elements to be rendered.
    */
-  #disposables: Map<string, ACGElement> = new Map();
+  #toRender: Map<string, ACGElement> = new Map();
 
+  /**
+   * TODO Describe.
+   */
+  #backupElements: Map<string, ACGElement> = new Map();
+
+  /**
+   * Contains raw configurations associated by name.
+   */
   #rawConfigs: Map<string, RawElementConfig> = new Map();
+
+  /**
+   * Contains map of parent names where
+   *  - key is name of element
+   *  - value is name of parent or null (root SVG element case)
+   */
   #parents: Map<string, Nullable<string>> = new Map();
+
+  /**
+   * Stage dom container.
+   */
+  #container: Nullable<Element> = null;
 
   constructor(config: RawElementConfig) {
     this.#config = config;
@@ -45,10 +65,28 @@ export default class Stage {
     return this.#parents;
   }
 
+  public get backupElements(): Map<string, ACGElement> {
+    return this.#backupElements;
+  }
+
+  public get container(): Nullable<Element> {
+    return this.#container;
+  }
+
+  public set container(container: Nullable<Element>) {
+    this.#container = container;
+    // TODO Add null case: null removes from DOM.
+  }
+
+  /**
+   * TODO DEscribe.
+   *
+   * @param name - .
+   */
   public reuse(name: string): Nullable<ACGElement> | undefined {
-    if (this.#disposables.has(name)) {
-      const el = <ACGElement>this.#disposables.get(name);
-      this.#disposables.delete(name);
+    if (this.#backupElements.has(name)) {
+      const el = <ACGElement>this.#backupElements.get(name);
+      this.#backupElements.delete(name);
       this.#elements.set(name, el);
       // TODO what about this.#parents?
       return el;
@@ -56,15 +94,32 @@ export default class Stage {
     return this.#elements.get(name);
   }
 
+  /**
+   * TODO Describe.
+   *
+   * @param config - Raw element config.
+   * @param parentName - Name of the parent element.
+   */
   public parseConfig(
     config: RawElementConfig = this.#config,
     parentName: Nullable<string> = null,
   ): void {
-    const { name, content } = config;
+    const { name, content, tag } = config;
 
-    const wrapper: Nullable<ACGElement> | undefined = this.#elements.get(name);
+    const element: Nullable<ACGElement> | undefined = this.reuse(name);
 
-    if (wrapper === undefined) {
+    if (element) {
+      if (element.tag !== tag) {
+        throw `Invalid element reuse: Stage tries to reuse element named "${name}".\nThe "tag" value must be the same (tag from backup is "${element.tag}", requested tag is "${tag}").`;
+      }
+
+      const reuseParentName = this.#parents.get(name);
+      if (reuseParentName !== parentName) {
+        throw `Invalid parent definition on element reuse: Stage tries to reuse element named "${name}".\nParent must be the same (backup parent of "${name}" is "${reuseParentName}", requested parent is "${parentName}").`;
+      }
+    }
+
+    if (element === undefined) {
       /*
         This is just to memoize name met.
         No need to create wrapper immediately.
@@ -80,7 +135,20 @@ export default class Stage {
         Store the parentName (value) for current name (key);
        */
       this.#parents.set(name, parentName);
-    } else if (wrapper === null) {
+
+      if (parentName === null) {
+        /*
+          This is a little bit hacky: this.find(name) basicly puts a very root (SVG)
+          element to this.#toRender and it renders all children on first rendering.
+
+          The hack is in the fact that children become rendered not because 
+          wrappers are created and put to this.#toRender, but because all the 
+          elements are just invalidated children of stage root wrapper.
+         */
+        const stageWrapper = this.find(name);
+        (<ACGElement>stageWrapper).isStage = true;
+      }
+    } else if (element === null) {
       /*
         Name duplication is found.
         Names must be unique.
@@ -93,6 +161,15 @@ export default class Stage {
     }
   }
 
+  /**
+   * Creates (or uses existing one) ACGElement instance (wrapper over
+   * the raw config).
+   * Gets only active element (existing in this.#elements), not in this.#backupElements.
+   *
+   * @param name - Name of element to be found.
+   * @returns {CGElement | undefined} - Raw config wrapper or undefined if name is not declared in
+   *  raw configuration.
+   */
   public find(name: string): ACGElement | undefined {
     const wrapper: Nullable<ACGElement> | undefined = this.#elements.get(name);
     if (wrapper === null) {
@@ -111,9 +188,48 @@ export default class Stage {
     return wrapper;
   }
 
+  /**
+   * TODO Describe.
+   *
+   * @param el - Element to backup its content.
+   */
+  backupContent(el: ACGElement): void {
+    const { content } = el;
+    if (Array.isArray(content)) {
+      content.forEach((childConfig) => {
+        const { name } = childConfig;
+        const childElement: ACGElement = <ACGElement>this.find(name); // It never must be undefined here.
+        this.#backupElements.set(name, childElement);
+        this.#elements.delete(name);
+        this.backupContent(childElement);
+      });
+    }
+  }
+
+  addToRender(el: ACGElement): void {
+    this.#toRender.set(el.name, el);
+  }
+
+  removeFromRender(el: ACGElement): void {
+    this.#toRender.delete(el.name);
+  }
+
   public render(): void {
-    debugger;
-    this.#rawConfigs.forEach((value, key) => console.log(key, value));
-    console.log('Render!');
+    // console.log('Render!');
+
+    for (const key of this.#toRender.keys()) {
+      const el = this.find(key);
+      render(<ACGElement>el);
+      this.#toRender.delete(key);
+
+      // TODO maybe move it to renderer somehow?
+      if (el?.isStage) {
+        if (this.#container) {
+          this.#container.appendChild(<SVGElement>el.domRef);
+        } else {
+          (<SVGElement>el.domRef).remove();
+        }
+      }
+    }
   }
 }

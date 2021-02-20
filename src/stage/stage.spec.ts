@@ -24,6 +24,11 @@ describe('#Stage init', function () {
       'Red-Path',
       'Green-Path',
     );
+  });
+
+  it('should correctly parse to stage.#parents', () => {
+    const config: RawElementConfig = <RawElementConfig>recursiveClone(twoLinesConfig);
+    const stage: Stage = new Stage(config);
 
     const { parents } = stage;
     expect(parents).to.have.length(9);

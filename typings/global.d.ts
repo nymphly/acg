@@ -15,3 +15,5 @@ declare type RawElementConfig = {
 };
 
 declare type UntypedObjectOrArray = Record<NumberOrString, unknown> | Array<unknown>;
+
+declare type SortingFunction<T> = (el1: T, el2: T) => number;

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
+const { DefinePlugin } = require('webpack');
 
 module.exports = {
   mode: 'production',
@@ -18,6 +19,11 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js'],
   },
+  plugins: [
+    new DefinePlugin({
+      $$PERFORMANCE_MONITORING$$: JSON.stringify(true),
+    }),
+  ],
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
