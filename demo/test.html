@@ -91,7 +91,7 @@
                 attrs: {
                   fill: 'none',
                   stroke: '#f00',
-                  'stroke-opacity': 0.47,
+                  'stroke-opacity': '100%',
                   d: 'M 10 0 L 110 100',
                 },
               },
@@ -101,7 +101,7 @@
                 attrs: {
                   fill: 'none',
                   stroke: '#0f0',
-                  'stroke-opacity': 0.5,
+                  'stroke-opacity': '100%',
                   d: 'M 0 0 L 100 100',
                 },
               },
@@ -124,31 +124,64 @@
 
   const t2 = Date.now();
   const linesLayer = stage.find('Lines-Layer');
+
+  const bluePathConfig = {
+    tag: 'path',
+    name: 'Blue-Path',
+    attrs: {
+      fill: 'none',
+      stroke: '#00f',
+      'stroke-opacity': '100%',
+      d: 'M 20 0 L 120 100',
+    },
+  };
+
+  const greenPathConfig = {
+    tag: 'path',
+    name: 'Yellow-Path',
+    attrs: {
+      fill: 'none',
+      stroke: '#ff0',
+      'stroke-opacity': '100%',
+      d: 'M 30 0 L 130 100',
+    },
+  };
+
+
   linesLayer.content = [
     ...linesLayer.content,
-    {
-      tag: 'path',
-      name: 'Blue-Path',
-      attrs: {
-        fill: 'none',
-        stroke: '#00f',
-        'stroke-opacity': 0.47,
-        d: 'M 20 0 L 120 100',
-      },
-    },
-    {
-      tag: 'path',
-      name: 'Yellow-Path',
-      attrs: {
-        fill: 'none',
-        stroke: '#ff0',
-        'stroke-opacity': 0.5,
-        d: 'M 30 0 L 130 100',
-      },
-    },
+    bluePathConfig,
+    greenPathConfig,
   ];
+
   stage.render();
   console.log(`Render time: ${Date.now() - t2}ms`);
+
+  const t3 = Date.now();
+  const rnd = (from, to) => Math.round(from + Math.random() * (to - from));
+
+  const newPaths = [];
+  for (let i = 0; i < 1000; i++) {
+    const conf = {
+      tag: 'path',
+      name: `Stress-${i}`,
+      attrs: {
+        fill: 'none',
+        stroke: '#55f',
+        'stroke-opacity': '20%',
+        d: `M ${rnd(0, 100)} ${rnd(100, 200)} L ${rnd(100, 200)} ${rnd(100, 200)}`
+      }
+    }
+    newPaths.push(conf);
+  }
+
+  linesLayer.content = [
+    ...linesLayer.content,
+    ...newPaths
+  ];
+
+  stage.render();
+  console.log(`Render time: ${Date.now() - t3}ms`);
 
   // console.log(stage.config);
 
