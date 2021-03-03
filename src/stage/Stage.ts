@@ -1,7 +1,14 @@
+/**
+ * @file
+ *
+ * Stage class implementation.
+ */
+
+import { Renderable } from '../disposable';
 import { ACGElement } from '../elements';
 import { render } from '../rendering';
 
-export default class Stage {
+export default class Stage extends Renderable {
   /**
    * Storage of current raw config.
    */
@@ -34,8 +41,8 @@ export default class Stage {
 
   /**
    * Contains map of parent names where
-   *  - key is name of element
-   *  - value is name of parent or null (root SVG element case)
+   * - key is name of element
+   * - value is name of parent or null (root SVG element case).
    */
   #parents: Map<string, Nullable<string>> = new Map();
 
@@ -45,6 +52,8 @@ export default class Stage {
   #container: Nullable<Element> = null;
 
   constructor(config: RawElementConfig) {
+    super();
+
     this.#config = config;
     this.parseConfig();
   }
@@ -82,6 +91,7 @@ export default class Stage {
    * TODO DEscribe.
    *
    * @param name - .
+   * @returns Qwer.
    */
   public reuse(name: string): Nullable<ACGElement> | undefined {
     if (this.#backupElements.has(name)) {
@@ -99,6 +109,7 @@ export default class Stage {
    *
    * @param config - Raw element config.
    * @param parentName - Name of the parent element.
+   * @throws
    */
   public parseConfig(
     config: RawElementConfig = this.#config,
@@ -167,8 +178,7 @@ export default class Stage {
    * Gets only active element (existing in this.#elements), not in this.#backupElements.
    *
    * @param name - Name of element to be found.
-   * @returns {CGElement | undefined} - Raw config wrapper or undefined if name is not declared in
-   *  raw configuration.
+   * @returns - Raw config wrapper or undefined if name is not declared in raw configuration.
    */
   public find(name: string): ACGElement | undefined {
     const wrapper: Nullable<ACGElement> | undefined = this.#elements.get(name);
@@ -231,5 +241,10 @@ export default class Stage {
         }
       }
     }
+  }
+
+  public dispose(): void {
+    this.isDisposed = true;
+    throw new Error('Method not implemented.');
   }
 }

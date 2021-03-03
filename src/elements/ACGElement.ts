@@ -1,7 +1,16 @@
+/**
+ * @file
+ *
+ * ACGElement implementaion.
+ */
+
+import { Renderable } from '../disposable';
 import { RenderState } from '../enums';
+import { Factory } from '../factory';
+import { render } from '../rendering';
 import { Stage } from '../stage';
 
-export default class ACGElement {
+export default class ACGElement extends Renderable {
   /**
    * Parent stage reference.
    */
@@ -32,9 +41,18 @@ export default class ACGElement {
    */
   #domRef: Nullable<SVGElement> = null;
 
+  /**
+   * Sort function for child elements.
+   */
   #sort: Nullable<SortingFunction<RawElementConfig>> = null;
 
+  /**
+   * Factries storage.
+   */
+  #factories: Map<string, Factory> = new Map();
+
   constructor(stage: Stage, rawConfig: RawElementConfig, parent: Nullable<string> = null) {
+    super();
     this.#stage = stage;
     this.#rawConfig = rawConfig;
     this.#parent = parent;
@@ -131,14 +149,26 @@ export default class ACGElement {
     return Boolean(this.#renderState & state);
   }
 
-  /*
-    TODO 
+  public factory(name: string, defaultConfig?: RawFactoryConfig): Factory {
+    const existingFactory = this.#factories.get(name);
+    if (existingFactory) {
+      return existingFactory;
+    }
 
-    1) Add DOM-reference support!!!
-    2) Add passive DOM-reference support: element can be rendered by
-       stage.#config rendering, but not be linked to ACGElement wrapper.
-    3) Add disposing support to completely destroy the element.
-    4) Add removing support to remove element from DOM with an ability to put it back as DOM.
+    if (!defaultConfig) {
+      throw `New factory "${name}" can't be created for element "${this.name}" without default config.`;
+    }
 
-   */
+    const newFactory = new Factory(name, this.name, <RawFactoryConfig>defaultConfig, this.stage);
+    this.#factories.set(name, newFactory);
+    return newFactory;
+  }
+
+  public render(): void {
+    render(this);
+  }
+
+  public dispose(): void {
+    throw new Error('Method not implemented.');
+  }
 }

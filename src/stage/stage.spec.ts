@@ -1,3 +1,9 @@
+/**
+ * @file
+ *
+ * Stage test.
+ */
+
 /// <reference types="./../../typings/global" />
 
 import { expect } from 'chai';

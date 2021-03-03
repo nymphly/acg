@@ -1,3 +1,9 @@
+/**
+ * @file
+ *
+ * DOM-rendering functions.
+ */
+
 import { ACGElement } from '../elements';
 import { RenderState } from '../enums';
 
@@ -5,6 +11,9 @@ export const SVG_NS = 'http://www.w3.org/2000/svg';
 
 export const ACG_ATTR_PREFIX = 'acg-';
 
+/**
+ * @param el
+ */
 function renderDom(el: ACGElement): void {
   if (el.hasRenderState(RenderState.DOM)) {
     const domElement = <SVGElement>document.createElementNS(SVG_NS, el.tag);
@@ -13,6 +22,9 @@ function renderDom(el: ACGElement): void {
   }
 }
 
+/**
+ * @param el
+ */
 function renderAttrs(el: ACGElement): void {
   if (el.hasRenderState(RenderState.ATTRS)) {
     const { domRef } = el;
@@ -34,6 +46,9 @@ function renderAttrs(el: ACGElement): void {
   }
 }
 
+/**
+ * @param el
+ */
 function renderContent(el: ACGElement): void {
   if (el.hasRenderState(RenderState.CONTENT)) {
     const { domRef } = el;
@@ -57,8 +72,13 @@ function renderContent(el: ACGElement): void {
   }
 }
 
+/**
+ * @param el
+ */
 export default function render(el: ACGElement): void {
-  renderDom(el);
-  renderAttrs(el);
-  renderContent(el);
+  if (!el.isDisposed) {
+    renderDom(el);
+    renderAttrs(el);
+    renderContent(el);
+  }
 }

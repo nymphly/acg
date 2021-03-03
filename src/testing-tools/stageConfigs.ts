@@ -1,3 +1,9 @@
+/**
+ * @file
+ *
+ * Stage configurations for testing purposes.
+ */
+
 export const twoLinesConfig: RawElementConfig = {
   tag: 'svg',
   name: 'Svg',
