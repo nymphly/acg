@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ACG: Circle packing</title>
+  <style>
+    html,
+    body,
+    #container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .slidecontainer {
+      width: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      /* Width of the outside container */
+    }
+  </style>
+  <script src='./../dist/bundle.js'>
+  </script>
+</head>
+
+<body>
+  <div class="slidecontainer">
+    <input type="range" min="-14" max="14" value="0" class="slider" id="myRange" step="0.1" style="width: 400px">
+    <p>Value: <span id="demo"></span></p>
+  </div>
+  <div id="container"></div>
+</body>
+
+<script>
+
+  var slider = document.getElementById("myRange");
+  var output = document.getElementById("demo");
+  output.innerHTML = slider.value;
+
+  slider.oninput = function () {
+    init(Number(this.value));
+    output.innerHTML = this.value;
+  }
+
+  const RAW_RADIUSES = Array.from({ length: 1000 }, () => Math.floor(Math.random() * 20));
+  // const RAW_RADIUSES = [
+  //   15, 12, 14, 11, 6, 14, 10, 20, 11, 4, 2, 1, 2, 4, 4, 10, 15, 20, 12, 12, 10, 11, 20, 22, 11, 10,
+  //   100, 200, 150,
+  //   5, 6, 6, 5, 7, 7
+  // ];
+
+  const RADIUSES = RAW_RADIUSES.sort((a, b) => b - a);
+  // const RADIUSES = RAW_RADIUSES;
+
+  const config = {
+    tag: 'svg',
+    name: 'Svg',
+    attrs: {
+      xmlns: 'http://www.w3.org/2000/svg',
+      border: 0,
+      width: '100%',
+      height: '100%',
+      class: 'anychart-ui-support',
+      style: 'display: block',
+    },
+    content: [
+      {
+        tag: 'circle',
+        name: 'AZAZA-Circle',
+        attrs: {
+          cx: 750,
+          cy: 382,
+          r: 430,
+          fill: 'lightgrey'
+        }
+
+      },
+      {
+        tag: 'g',
+        name: 'Root',
+      },
+      {
+        tag: 'path',
+        name: 'Centers-Path',
+        attrs: {
+          stroke: 'none',
+          fill: 'none'
+        }
+      }
+    ],
+  };
+
+  const t0 = Date.now();
+  const stage = acg.create(config);
+  stage.container = document.getElementById('container');
+
+
+  stage.render();
+  console.log(`Very first render time: ${Date.now() - t0}ms`);
+
+  function init(initAngle = 0) {
+    const start = Date.now();
+
+    const root = stage.find('Root');
+    const circlesFactory = root.factory('Circles-Factory', {
+      tag: 'circle',
+      attrs: {
+        cx: 0,
+        cy: 0,
+        r: 0,
+        stroke: 'black',
+        fill: 'lightblue'
+      }
+    });
+
+    const stageBounds = stage.container.getBoundingClientRect();
+    const c0 = {
+      cx: stageBounds.width / 2,
+      cy: stageBounds.height / 2,
+      r: RADIUSES[0]
+    }
+
+
+    const c1 = {
+      cx: c0.cx + (c0.r + RADIUSES[1]) * Math.cos(initAngle),
+      cy: c0.cy + (c0.r + RADIUSES[1]) * Math.sin(initAngle),
+      r: RADIUSES[1]
+    }
+
+    const CENTER = {
+      x: (c0.cx + c1.cx) / 2,
+      y: (c0.cy + c1.cy) / 2
+    }
+
+    let AVAILABLE_CIRCLES = [
+      {
+        circle1: c0,
+        circle2: c1,
+        positionMultiplier: 1
+      }
+    ];
+
+    const CIRCLES = [c0, c1];
+
+    let currRaduis = 2;
+
+    function intersects(c1, c2) {
+      const diffX = Math.abs(c1.cx - c2.cx); // diff of X center values
+      const diffY = Math.abs(c1.cy - c2.cy); // diff of Y center values
+      const sumRad = c1.r + c2.r; // sum of bubble radius
+
+      return (Math.sqrt(diffX ** 2 + diffY ** 2) - Math.abs(sumRad)) < -0.001;
+    }
+
+    function calc() {
+      let radius = RADIUSES[currRaduis];
+      let iterations = 0;
+
+      while (radius !== undefined) {
+        iterations += 1;
+        const availableCircles = AVAILABLE_CIRCLES[0];
+        const { circle1, circle2, positionMultiplier } = availableCircles;
+
+        const AB = circle1.r + circle2.r;
+        const AC = radius + circle1.r;
+        const BC = radius + circle2.r;
+
+        const cosAlpha = (AC ** 2 + AB ** 2 - BC ** 2) / (2 * AC * AB);
+        const alpha = Math.acos(cosAlpha);
+        const cosDeltaAlpha = (circle2.cx - circle1.cx) / AB;
+        const deltaAlpha = Math.acos(cosDeltaAlpha);
+
+        const sin = (circle2.cy - circle1.cy) / (circle1.r + circle2.r);
+
+        const multX = sin >= 0 ? 1 : -1;
+
+        const sumAlpha = (alpha + positionMultiplier * multX * deltaAlpha);
+
+        const circle = {
+          cx: circle1.cx + AC * Math.cos(sumAlpha),
+          cy: circle1.cy + positionMultiplier * AC * Math.sin(sumAlpha),
+          r: radius
+        }
+
+        let hasIntersection = false;
+        for (let i = 0; i < CIRCLES.length; i++) {
+          const c = CIRCLES[i];
+          if (intersects(c, circle)) {
+            hasIntersection = true;
+            break;
+          }
+        }
+
+        if (hasIntersection) {
+          if (positionMultiplier === 1) {
+            availableCircles.positionMultiplier = -1;
+          } else {
+            availableCircles.positionMultiplier = 1;
+            // positionMultiplier is -1.
+            const el = AVAILABLE_CIRCLES.shift();
+            AVAILABLE_CIRCLES.push(el);
+          }
+        } else {
+          // No intersection: new circle can be added.
+          const availableCircle1 = {
+            circle1,
+            circle2: circle,
+            positionMultiplier: 1
+          };
+
+          const availableCircle2 = {
+            circle1: circle,
+            circle2,
+            positionMultiplier: 1
+          };
+
+          AVAILABLE_CIRCLES.push(availableCircle1, availableCircle2);
+
+          CIRCLES.push(circle);
+          currRaduis += 1;
+        }
+
+        radius = RADIUSES[currRaduis];
+
+      } // end of while.
+
+      console.log(`Iterations: ${iterations}`);
+
+    }
+
+    calc();
+
+    function draw() {
+      circlesFactory.clear();
+      let d = '';
+
+      CIRCLES.forEach((circle, index) => {
+        const circ = circlesFactory.add();
+        circ.attrs = {
+          ...circ.attrs,
+          ...circle
+        }
+
+        if (index) {
+          d = `${d} L ${circle.cx} ${circle.cy}`;
+        } else {
+          d = `M ${circle.cx} ${circle.cy}`;
+        }
+
+      });
+
+      // d = `${d} Z`;
+      const centersPath = stage.find('Centers-Path');
+      centersPath.attrs = {
+        ...centersPath.attrs,
+        d
+      }
+      stage.render();
+
+      console.log(`Single init time: ${Date.now() - start}ms`);
+    }
+    draw();
+  }
+
+  init();
+
+
+
+</script>
+
+</html>

@@ -57,9 +57,7 @@ export default class Factory extends Renderable {
     if (parent) {
       const el: RawElementConfig = this.use(index);
       el.attrs = attrs || el.attrs;
-      parent.content = Array.isArray(parent.content)
-        ? (parent.content = [...parent.content, el])
-        : [el];
+      parent.add(el);
 
       return <ACGElement>this.#stage?.find(el.name);
     }

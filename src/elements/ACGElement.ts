@@ -164,6 +164,28 @@ export default class ACGElement extends Renderable {
     return newFactory;
   }
 
+  /**
+   * Lightweight implementation of ACGElement's content modification
+   * to avoid constructions like this: 
+   *   element.content = [...element.content, newElement];
+   * 
+   * This lightweight method should be used for the multiple element's content
+   * modifications (factory case, for example) to avoid multiple putting content
+   * to backup and taking it from backup.
+   * 
+   * @param config - Element config to be added.
+   */
+  public add(config: RawElementConfig): void {
+    if (Array.isArray(this.#rawConfig.content)) {
+      this.#rawConfig.content.push(config);
+    } else {
+      this.#rawConfig.content = [config];
+    }
+    this.#stage.parseConfig(config, this.name);
+
+    this.invalidate(RenderState.CONTENT);
+  }
+
   public render(): void {
     render(this);
   }

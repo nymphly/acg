@@ -31,12 +31,12 @@ function renderAttrs(el: ACGElement): void {
     const { attributes } = <SVGElement>domRef;
 
     // Removing all attributes.
-    Object.entries(attributes).forEach(([key]) => {
+    Object.entries(attributes).forEach(function attributesRemover([key]) {
       domRef?.removeAttribute(key);
     });
 
     // Adding new ones.
-    Object.entries(el.attrs).forEach(([key, value]) => {
+    Object.entries(el.attrs).forEach(function attributesAdder([key, value]) {
       domRef?.setAttribute(key, String(value));
     });
 
@@ -59,7 +59,7 @@ function renderContent(el: ACGElement): void {
         el.content.sort(<SortingFunction<RawElementConfig>>el.sort);
       }
 
-      el.content.forEach((childConfig) => {
+      el.content.forEach(function childAppender(childConfig) {
         const childEl = <ACGElement>el.stage.find(childConfig.name); // By idea, can't be undefined.
         render(childEl);
         domRef?.appendChild(<SVGElement>childEl.domRef);
@@ -73,7 +73,9 @@ function renderContent(el: ACGElement): void {
 }
 
 /**
- * @param el
+ * Default ACGElement renderer.
+ * 
+ * @param el - Element to be rendered.
  */
 export default function render(el: ACGElement): void {
   if (!el.isDisposed) {
