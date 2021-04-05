@@ -5,6 +5,9 @@
  */
 import { Pather } from './pather';
 import { Stage } from './stage';
+import {
+  svg
+} from './templates';
 
 /**
  * Default stage creating function.
@@ -24,3 +27,12 @@ export function create(config: RawElementConfig): Stage {
 export function pather(): Pather {
   return new Pather();
 }
+
+/**
+ * 
+ */
+export const templates = {
+  get svg() {
+    return svg();
+  }
+};

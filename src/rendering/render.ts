@@ -9,7 +9,7 @@ import { RenderState } from '../enums';
 
 export const SVG_NS = 'http://www.w3.org/2000/svg';
 
-export const ACG_ATTR_PREFIX = 'acg-';
+export const DATA_ACG_NAME = 'data-acgName';
 
 /**
  * @param el
@@ -40,7 +40,7 @@ function renderAttrs(el: ACGElement): void {
       domRef?.setAttribute(key, String(value));
     });
 
-    domRef?.setAttribute(`${ACG_ATTR_PREFIX}name`, el.name);
+    domRef?.setAttribute(DATA_ACG_NAME, el.name);
 
     el.consistify(RenderState.ATTRS);
   }

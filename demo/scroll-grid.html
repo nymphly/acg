@@ -5,20 +5,29 @@
   <meta charset="UTF-8">
   <title>Title</title>
   <style>
-    html,
-    body,
     #container {
-      width: 100%;
-      height: 100%;
-      margin: 0;
+      width: 900px;
+      height: 600px;
+      margin: 20;
       padding: 0;
+      border: 1px solid blue;
+    }
+
+    .acg-label {
+      color: blueviolet;
+      fill: blueviolet;
+      -webkit-mask-image: linear-gradient(to right, black 10px, transparent 100%);
+      -webkit-mask-size: 50px 50px;
+      mask-image: linear-gradient(to right, black 10px, transparent 100%);
+      mask-size: 50px 50px;
     }
   </style>
-  <script src='./../dist/bundle.js'>
+  <script src='../dist/bundle.js'>
   </script>
 </head>
 
 <body>
+  <span class="acg-label">qwerty</span>
   <div id="container"></div>
 </body>
 
@@ -27,6 +36,33 @@
   const HEIGHT = 600;
   const CELL_HEIGHT = 30;
   const CELL_WIDTH = 30;
+
+  const borderStrokeConfig = {
+    tag: 'path',
+    name: 'Border',
+    attrs: {
+      // fill: 'none',
+      stroke: '#0f0',
+      'stroke-opacity': '100%',
+      'stroke-width': 1,
+      d: 'M 0 0',
+      class: 'acg-label'
+    },
+  };
+
+  const textsLayerConfig = {
+    tag: 'g',
+    name: 'Texts-Layer'
+  };
+
+  const rootLayerConfig = {
+    tag: 'g',
+    name: 'Root',
+    content: [
+      borderStrokeConfig,
+      textsLayerConfig
+    ],
+  };
 
   const config = {
     tag: 'svg',
@@ -40,61 +76,7 @@
       style: 'display: block',
     },
     content: [
-      {
-        tag: 'defs',
-        name: 'Defs',
-        content: [
-          {
-            tag: 'linearGradient',
-            name: 'Black-To-White',
-            attrs: {
-              'id:uid': '', // TODO uid command generates UID, ignores '' value.
-              x1: 0,
-              y1: 0.5,
-              x2: 1,
-              y2: 0.5,
-              gradientUnits: 'objectBoundingBox',
-            },
-            content: [
-              {
-                tag: 'stop',
-                name: 'First-Stop',
-                attrs: {
-                  offset: 0,
-                  style: 'stop-color:#ffffff; stop-opacity:1',
-                },
-              },
-
-              {
-                tag: 'stop',
-                name: 'Second-Stop',
-                attrs: {
-                  offset: 1,
-                  style: 'stop-color:#000000; stop-opacity:1',
-                },
-              },
-            ],
-          },
-        ],
-      },
-
-      {
-        tag: 'g',
-        name: 'Root',
-        content: [
-          {
-            tag: 'path',
-            name: 'Border',
-            attrs: {
-              fill: 'none',
-              stroke: '#0f0',
-              'stroke-opacity': '100%',
-              'stroke-width': 1,
-              d: 'M 0 0',
-            },
-          },
-        ],
-      },
+      rootLayerConfig
     ],
   };
 
@@ -114,12 +96,44 @@
   const border = stage.find('Border');
 
   function drawState(x = 0, y = 0) {
-    console.log('Drawing!!!');
+    // console.log('Drawing!!!');
     pather.clear();
     let currX = x;
     let currY = y;
+
+    const textsLayer = stage.find('Texts-Layer');
+    const textFactory = textsLayer.factory('Texts-Factory', {
+      tag: 'text',
+      attrs: {
+        'class': 'acg-label'
+      }
+    });
+    textFactory.clear();
+
+    const content = 'AzSxDcFvGbHnJmK,QaWsEd';
+    const text = textFactory.add();
+    text.attrs = {
+      ...text.attrs,
+      x: currX,
+      y: 10
+    };
+    text.content = [
+      {
+        tag: 'tspan',
+        name: `${text.name}-Tspan`,
+        attrs: {
+          'class': 'acg-label'
+        },
+        content
+      }
+    ];
+
+    // const content = 'Az';
     while (currX <= WIDTH) {
       pather.moveTo(currX, 0).v(HEIGHT);
+
+
+
       currX += CELL_WIDTH;
     }
 
@@ -144,23 +158,6 @@
 
     drawState(offX % CELL_WIDTH, offY % CELL_HEIGHT);
   });
-
-  // container.addEventListener('mousedown', (e) => {
-  //   dragging = true;
-  // });
-
-  // document.addEventListener('mousemove', (e) => {
-  //   if (dragging) {
-  //     console.log(e);
-  //   }
-  // });
-
-  // document.addEventListener('mouseup', (e) => {
-  //   if (dragging) {
-  //     console.log(e);
-  //   }
-  //   dragging = false;
-  // });
 
 </script>
 

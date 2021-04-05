@@ -82,7 +82,7 @@ export default class Pather {
   }
 
   public close(): Pather {
-    this.#rv = `${this.#rv}Z`;
+    this.#rv = `${this.#rv} Z`;
     return this;
   }
 

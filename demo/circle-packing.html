@@ -48,9 +48,10 @@
   const RAW_RADIUSES = Array.from({ length: 1000 }, () => Math.floor(Math.random() * 20));
   // const RAW_RADIUSES = [
   //   15, 12, 14, 11, 6, 14, 10, 20, 11, 4, 2, 1, 2, 4, 4, 10, 15, 20, 12, 12, 10, 11, 20, 22, 11, 10,
-  //   100, 200, 150,
+  //   180, 150, 145,
   //   5, 6, 6, 5, 7, 7
   // ];
+  // const RAW_RADIUSES = [200];
 
   const RADIUSES = RAW_RADIUSES.sort((a, b) => b - a);
   // const RADIUSES = RAW_RADIUSES;
@@ -74,7 +75,7 @@
           cx: 750,
           cy: 382,
           r: 430,
-          fill: 'lightgrey'
+          fill: 'none'
         }
 
       },
@@ -227,7 +228,7 @@
 
       } // end of while.
 
-      console.log(`Iterations: ${iterations}`);
+      // console.log(`Iterations: ${iterations}`);
 
     }
 
@@ -260,7 +261,7 @@
       }
       stage.render();
 
-      console.log(`Single init time: ${Date.now() - start}ms`);
+      // console.log(`Single init time: ${Date.now() - start}ms`);
     }
     draw();
   }
