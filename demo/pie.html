@@ -45,74 +45,208 @@
     .selected {
       fill: navy;
     }
+
+    .labels {
+      fill: white;
+      font-size: 1.2vmin;
+      pointer-events: none;
+      text-shadow: black 2px 2px 0px;
+      text-anchor: middle;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+    }
+
+    .label-selected {
+      fill: yellow;
+      font-size: 1.3vmin;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    }
+
+    .tooltip {
+      position: absolute;
+      display: none;
+      border: 1px solid grey;
+      border-radius: 3px;
+      background-color: white;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      font-size: 2vmin;
+      color: navy;
+      padding: 10px;
+      pointer-events: none;
+      text-shadow: black 1px 1px 0px;
+    }
   </style>
   <script src='./../dist/bundle.js'>
   </script>
 </head>
 
 <body>
-  <div id="container"></div>
+  <div id="container" class="grid">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+
+  <div class="tooltip"></div>
 </body>
 
 <script>
-  function getRandomData() {
-    // return Array.from({ length: 7 }, () => Math.floor(Math.random() * 20));
-    return Array.from({ length: 7 }, () => 1);
-  }
-</script>
+  const stages = [];
+  const dataSets = [];
 
-<script>
+  function getRandomData() {
+    return Array.from({ length: 7 }, () => Math.floor(Math.random() * 20) + 5);
+    // return Array.from({ length: 7 }, () => 1);
+  }
 
   const container = document.querySelector('#container');
 
   const resizeObserver = new ResizeObserver(entries => {
-    const container = entries[0];
+    entries.forEach((entry, index) => {
+      const stage = stages[index];
+      const dataSet = dataSets[index];
 
-    if (container) {
-      if (container.contentBoxSize) {
+      if (entry.contentBoxSize) {
         // Firefox implements `contentBoxSize` as a single content rect, rather than an array.
-        const contentBoxSize = Array.isArray(container.contentBoxSize)
-          ? container.contentBoxSize[0]
-          : container.contentBoxSize;
+        const contentBoxSize = Array.isArray(entry.contentBoxSize)
+          ? entry.contentBoxSize[0]
+          : entry.contentBoxSize;
 
-        renderStage(contentBoxSize.inlineSize, contentBoxSize.blockSize);
+        renderStage(stage, dataSet, contentBoxSize.inlineSize, contentBoxSize.blockSize);
       } else {
-        renderStage(container.contentRect.width, container.contentRect.height);
+        renderStage(stage, dataSet, entry.contentRect.width, entry.contentRect.height);
       }
-    }
+    });
 
-    console.log('Bounds changed');
   });
 
-  const data = getRandomData();
-  const sum = data.reduce((acc, curr) => acc + curr, 0);
-  const slicesData = data.map((value, index) => {
-    return {
-      value,
-      index,
-      weight: value / sum,
-      name: `Data item #${index}`
-    }
+  function createStage(container) {
+    const data = getRandomData();
+    const sum = data.reduce((acc, curr) => acc + curr, 0);
+    const slicesData = data.map((value, index) => {
+      return {
+        value,
+        index,
+        weight: value / sum,
+        name: `Point${index}: ${value}`
+      }
+    });
+
+    dataSets.push(slicesData);
+
+    const config = acg.templates.svg;
+    config.content = [
+      ...config.content,
+      {
+        tag: 'g',
+        name: 'Labels-Layer'
+      }
+    ]
+    const stage = acg.create(config);
+    stage.container = container;
+
+    return stage;
+  }
+
+  Array.from(container.children).forEach(div => {
+    const stage = createStage(div);
+    stages.push(stage);
+
+    resizeObserver.observe(div);
+
+    div.addEventListener('click', e => {
+      const { target } = e;
+      if (target.dataset.acgPointType === 'slice') {
+        const { classList } = target;
+        if (classList.contains('selected')) {
+          classList.remove('selected');
+        } else {
+          classList.add('selected');
+        }
+
+        const svg = target.closest('svg');
+        const { relatedLabel } = target.dataset;
+        const label = svg.querySelector(`text[data-acgName="${relatedLabel}"]`);
+        if (label) {
+          if (label.classList.contains('label-selected')) {
+            label.classList.remove('label-selected');
+          } else {
+            label.classList.add('label-selected');
+          }
+        }
+      }
+    });
+
+    div.addEventListener('mousemove', e => {
+      const { target } = e;
+      const tooltip = document.querySelector('.tooltip');
+
+      if (target.dataset.acgPointType === 'slice') {
+        setTimeout(() => {
+          tooltip.style.display = 'block';
+          tooltip.style.left = `${e.clientX + 5}px`;
+          tooltip.style.top = `${e.clientY + 5}px`;
+
+          const style = window.getComputedStyle(target);
+          tooltip.style.color = style.fill;
+          tooltip.textContent = target.dataset.tooltipText;
+        }, 150);
+
+      } else {
+        setTimeout(() => {
+          tooltip.style.display = 'none';
+        }, 150);
+      }
+    });
   });
 
-  console.table(slicesData);
 
-  const config = acg.templates.svg;
-  const stage = acg.create(config);
-  const rootLayer = stage.find('Root-Layer');
-  const pather = acg.pather();
+  function renderStage(stage, dataSet, width, height) {
+    const rootLayer = stage.find('Root-Layer');
+    const labelsLayer = stage.find('Labels-Layer');
 
-  const slicesFactory = rootLayer.factory('Slices-Factory', {
-    tag: 'path',
-    attrs: {
-      stroke: 'white',
-      fill: 'none',
-      'data-acgPointType': 'slice'
-    }
-  });
+    const pather = acg.pather();
 
-  function renderStage(width, height) {
+    const slicesFactory = rootLayer.factory('Slices-Factory', {
+      tag: 'path',
+      attrs: {
+        stroke: 'white',
+        fill: 'none',
+        'data-acgPointType': 'slice'
+      }
+    });
+
+    const labelsFactory = labelsLayer.factory('Labels-Factory', {
+      tag: 'text',
+      attrs: {
+        class: 'labels',
+        'data-acgPointType': 'label'
+      }
+    });
+
     slicesFactory.clear();
+    labelsFactory.clear();
+
     const centerX = width / 2;
     const centerY = height / 2;
     const radius = 0.9 * Math.min(centerX, centerY);
@@ -120,48 +254,55 @@
     const START = -Math.PI / 2;
     let start = START;
     let weightCurrSum = 0;
-    slicesData.forEach((d, index) => {
+    dataSet.forEach((d, index) => {
       pather.clear();
 
       const path = slicesFactory.add();
       path.attrs = {
         ...path.attrs,
-        class: `palette-${index + 1}`
+        class: `palette-${index + 1}`,
+        'data-relatedLabel': `Labels-Layer-Labels-Factory-${index + 1}`,
+        'data-tooltipText': d.name
       }
 
-      const destX = centerX + Math.cos(start) * radius;
-      const destY = centerY + Math.sin(start) * radius;
+      const offsetX = Math.cos(start) * radius;
+      const offsetY = Math.sin(start) * radius;
+
+      const destX = centerX + offsetX;
+      const destY = centerY + offsetY;
 
       weightCurrSum += d.weight;
+      const alpha1 = start;
+
       start = START + 2 * Math.PI * weightCurrSum;
+      const alpha2 = start;
+
+      const labelOffsetX = Math.cos((alpha2 + alpha1) / 2) * radius;
+      const labelOffsetY = Math.sin((alpha2 + alpha1) / 2) * radius;
+
+      const label = labelsFactory.add();
+      label.attrs = {
+        ...label.attrs,
+        x: centerX + labelOffsetX / 1.5,
+        y: centerY + labelOffsetY / 1.5
+      };
+      label.content = d.name;
+
+      const nextOffsetX = Math.cos(start) * radius;
+      const nextOffsetY = Math.sin(start) * radius;
 
       pather
         .moveTo(centerX, centerY)
         .lineTo(destX, destY)
-        .arcTo(radius, radius, 0, 0, 1, centerX + Math.cos(start) * radius, centerY + Math.sin(start) * radius)
+        .arcTo(radius, radius, 0, 0, 1, centerX + nextOffsetX, centerY + nextOffsetY)
         .close()
         .applyTo(path);
-        
-      
     });
 
     stage.render();
   }
 
-  stage.container = container;
-  resizeObserver.observe(container);
 
-  container.addEventListener('click', e => {
-    const { target } = e;
-    if (target.dataset.acgPointType === 'slice') {
-      const { classList } = target;
-      if (classList.contains('selected')) {
-        classList.remove('selected');
-      } else {
-        classList.add('selected');
-      }
-    }
-  })
 </script>
 
 </html>
