@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
+  <link rel="stylesheet" href="palette.css">
   <style>
     html,
     body {
@@ -13,33 +14,7 @@
       padding: 0;
     }
 
-    .palette-1 {
-      fill: red
-    }
-
-    .palette-2 {
-      fill: green
-    }
-
-    .palette-3 {
-      fill: blue
-    }
-
-    .palette-4 {
-      fill: magenta
-    }
-
-    .palette-5 {
-      fill: yellow
-    }
-
-    .palette-6 {
-      fill: cyan
-    }
-
-    .palette-7 {
-      fill: pink
-    }
+    
 
     .selected {
       fill: navy;
@@ -268,7 +243,7 @@
       const path = slicesFactory.add();
       path.attrs = {
         ...path.attrs,
-        class: `palette-${index + 1}`,
+        class: `acg-palette-${index + 1}`,
         'data-relatedLabel': `Labels-Layer-Labels-Factory-${index + 1}`,
         'data-tooltipText': d.name
       }
