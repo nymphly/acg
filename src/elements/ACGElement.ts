@@ -92,21 +92,21 @@ export default class ACGElement extends Renderable {
     return this.#rawConfig.tag;
   }
 
-  get attrs(): Record<string, NumberOrString> {
+  public get attrs(): Record<string, NumberOrString> {
     return { ...this.#rawConfig.attrs };
   }
 
-  set attrs(newAttrs: Record<string, NumberOrString>) {
+  public set attrs(newAttrs: Record<string, NumberOrString>) {
     this.#rawConfig.attrs = { ...newAttrs };
     this.invalidate(RenderState.ATTRS);
   }
 
-  get content(): RawElementContent {
+  public get content(): RawElementContent {
     const { content } = this.#rawConfig;
     return Array.isArray(content) ? [...content] : content || '';
   }
 
-  set content(newContent: RawElementContent) {
+  public set content(newContent: RawElementContent) {
     this.#stage.backupContent(this);
 
     if (Array.isArray(newContent)) {
@@ -121,27 +121,27 @@ export default class ACGElement extends Renderable {
     this.invalidate(RenderState.CONTENT);
   }
 
-  get domRef(): Nullable<SVGElement> {
+  public get domRef(): Nullable<SVGElement> {
     return this.#domRef;
   }
 
-  set domRef(domElement: Nullable<SVGElement>) {
+  public set domRef(domElement: Nullable<SVGElement>) {
     this.#domRef = domElement;
   }
 
-  get isConsistent(): boolean {
+  public get isConsistent(): boolean {
     return this.#renderState === 0;
   }
 
-  get parent(): Nullable<string> {
+  public get parent(): Nullable<string> {
     return this.#parent;
   }
 
-  get sort(): Nullable<SortingFunction<RawElementConfig>> {
+  public get sort(): Nullable<SortingFunction<RawElementConfig>> {
     return this.#sort;
   }
 
-  set sort(sortingFn: Nullable<SortingFunction<RawElementConfig>>) {
+  public set sort(sortingFn: Nullable<SortingFunction<RawElementConfig>>) {
     this.#sort = sortingFn;
   }
 

@@ -22,19 +22,19 @@
     }
 
     .acg-border {
-      stroke: #80cbc4;
+      stroke: #000;
       stroke-opacity: 100%;
       stroke-width: 1;
     }
 
     .acg-label {
-      /* fill: white; */
+      /* fill: navy; */
       /* font-size: 1.2vmin; */
       pointer-events: none;
       /* text-shadow: black 1px 1px 0px; */
       /* text-anchor: middle; */
       font-family: Verdana, Geneva, Tahoma, sans-serif;
-      alignment-baseline: middle;
+      /* alignment-baseline: middle; */
     }
   </style>
   <script src='../dist/bundle.js'>
@@ -54,8 +54,11 @@
     xIndex: 0,
     yIndex: 0,
     xOffset: 0,
-    yOffset: 0
+    yOffset: 0,
+    width: 0,
+    height: 0
   };
+
 
   function generateData() {
     const length = 1e3;
@@ -123,10 +126,13 @@
           ? entry.contentBoxSize[0]
           : entry.contentBoxSize;
 
-        renderState(contentBoxSize.inlineSize, contentBoxSize.blockSize);
+        state.width = contentBoxSize.inlineSize;
+        state.height = contentBoxSize.blockSize;
       } else {
-        renderState(entry.contentRect.width, entry.contentRect.height);
+        state.width = entry.contentRect.width;
+        state.height = entry.contentRect.height;
       }
+      renderState();
     });
 
     // const duration = Date.now() - NOW;
@@ -136,7 +142,9 @@
 
 
 
-  function renderState(width, height) {
+  function renderState() {
+    const { width, height, xOffset, yOffset, xIndex, yIndex } = state;
+
     const textsLayer = stage.find('Texts-Layer');
     const textFactory = textsLayer.factory('Texts-Factory', {
       tag: 'text',
@@ -160,27 +168,76 @@
     const horizontalLabelsCount = Math.ceil(width / CELL_WIDTH) + 1;
     const verticalLabelsCount = Math.ceil(height / CELL_HEIGHT) + 1;
 
-    const xIndex = Math.max(0, Math.min(state.xIndex, data.length - horizontalLabelsCount));
-    const yIndex = Math.max(0, Math.min(state.yIndex, data[0].length - verticalLabelsCount));
+    const xInd = Math.max(0, Math.min(xIndex, data.length - horizontalLabelsCount));
+    const yInd = Math.max(0, Math.min(yIndex, data[0].length - verticalLabelsCount));
 
     let xCounter = 0;
 
     pather
-      .moveTo(state.xOffset, state.yOffset)
+      .moveTo(xOffset, yOffset)
       .h(width)
-      .moveTo(state.xOffset, state.yOffset)
+      .moveTo(xOffset, yOffset)
       .v(height);
 
-    for (let i = xIndex; i < xIndex + horizontalLabelsCount; i++) {
+    for (let i = xInd; i < xInd + horizontalLabelsCount; i++) {
       let yCounter = 0;
-      for (let j = yIndex; j < yIndex + verticalLabelsCount; j++) {
-        const text = textFactory.add({
-          class: 'acg-label',
-          x: state.xOffset + xCounter * CELL_WIDTH + 2,
-          y: state.yOffset + yCounter * CELL_HEIGHT + CELL_HEIGHT / 2
+
+      const id = `acg-lg-${i}`;
+      const linearGradient = lgFactory.add({
+        id,
+        x1: xOffset + xCounter * CELL_WIDTH,
+        x2: xOffset + xCounter * CELL_WIDTH + CELL_WIDTH,
+        y1: 0,
+        y2: 0
+      });
+
+      const stopsFactory = linearGradient.factory('LG-Stops', {
+        tag: 'stop'
+      });
+      stopsFactory.clear();
+
+      const stop1 = stopsFactory.add({
+        offset: 0,
+        style: 'stop-color: navy; stop-opacity: 1'
+      });
+
+      const stop2 = stopsFactory.add({
+        offset: 0.85,
+        style: 'stop-color: navy; stop-opacity: 1'
+      });
+
+      const stop3 = stopsFactory.add({
+        offset: 0.95,
+        style: 'stop-color: navy; stop-opacity: 0.5'
+      });
+
+      const stop4= stopsFactory.add({
+        offset: 1,
+        style: 'stop-color: navy; stop-opacity: 0'
+      });
+
+      const text = textFactory.add({
+        class: 'acg-label',
+        x: xOffset + xCounter * CELL_WIDTH + 2,
+        // y: yOffset + yCounter * CELL_HEIGHT + CELL_HEIGHT / 2,
+        y: -CELL_HEIGHT/2,
+        fill: `url(#${id})`
+      });
+
+      const tSpanFactory = text.factory('TSpan-Factory', {
+        tag: 'tspan',
+        attrs: {
+          x: xOffset + xCounter * CELL_WIDTH + 2
+        }
+      });
+      tSpanFactory.clear();
+
+      for (let j = yInd; j < yInd + verticalLabelsCount; j++) {
+        const tSpan = tSpanFactory.add({
+          dy: CELL_HEIGHT
         });
 
-        text.content = data[i][j];
+        tSpan.content = data[i][j];
         yCounter += 1;
       }
       xCounter += 1;
@@ -188,14 +245,14 @@
 
 
     xCounter = 1;
-    for (let i = xIndex; i < xIndex + horizontalLabelsCount; i++) {
-      pather.moveTo(state.xOffset + xCounter * CELL_WIDTH, state.yOffset).v(height);
+    for (let i = xInd; i < xInd + horizontalLabelsCount; i++) {
+      pather.moveTo(xOffset + xCounter * CELL_WIDTH, yOffset).v(height);
       xCounter += 1;
     }
 
     let yCounter = 1;
-    for (let j = yIndex; j < yIndex + verticalLabelsCount; j++) {
-      pather.moveTo(state.xOffset, state.yOffset + yCounter * CELL_HEIGHT).h(width);
+    for (let j = yInd; j < yInd + verticalLabelsCount; j++) {
+      pather.moveTo(xOffset, yOffset + yCounter * CELL_HEIGHT).h(width);
       yCounter += 1;
     }
 
@@ -263,6 +320,18 @@
 
   container.addEventListener('mousewheel', (e) => {
     e.preventDefault();
+    // console.log(e.deltaX, e.deltaY);
+
+    const { xIndex, yIndex, xOffset, yOffset } = state;
+
+    const dY = e.deltaY % CELL_HEIGHT;
+    const newYOffset = state.yOffset - dY;
+    const dX = e.deltaX % CELL_WIDTH;
+    const newXOffset = state.xOffset - dX;
+    state.yOffset = newYOffset % CELL_HEIGHT - CELL_HEIGHT;
+    state.xOffset = newXOffset % CELL_WIDTH - CELL_WIDTH;
+
+
 
     // const dX = e.deltaX % CELL_WIDTH;
     // const dY = e.deltaY % CELL_HEIGHT;
@@ -270,6 +339,11 @@
     // offY -= dY;
 
     // drawState(offX % CELL_WIDTH, offY % CELL_HEIGHT);
+    renderState();
+  });
+
+  container.addEventListener('touchmove', (e) => {
+    e.preventDefault();
   });
 
 </script>

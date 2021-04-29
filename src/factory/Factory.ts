@@ -56,7 +56,12 @@ export default class Factory extends Renderable {
     const parent: ACGElement | undefined = this.#stage?.find(this.#parentElementName);
     if (parent) {
       const el: RawElementConfig = this.use(index);
-      el.attrs = attrs || el.attrs;
+      
+      // This will merge default attributes with incoming ones. Probably should redefine.
+      el.attrs = {
+        ...el.attrs,
+        ...attrs
+      };
       parent.add(el);
 
       return <ACGElement>this.#stage?.find(el.name);
