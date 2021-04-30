@@ -6,6 +6,7 @@
 
 import { Renderable } from '../disposable';
 import { ACGElement } from '../elements';
+import { RenderState } from '../enums';
 import { Stage } from '../stage';
 
 export default class Factory extends Renderable {
@@ -62,9 +63,12 @@ export default class Factory extends Renderable {
         ...el.attrs,
         ...attrs
       };
+
       parent.add(el);
 
-      return <ACGElement>this.#stage?.find(el.name);
+      const element = <ACGElement>this.#stage?.find(el.name);
+      element.invalidate(RenderState.ATTRS);
+      return element;
     }
     throw `ACG factory bug: add() is failed for factory "${this.#name}" of element "${
       this.#parentElementName

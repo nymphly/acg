@@ -6,3 +6,4 @@
  */
 
 declare const $$PERFORMANCE_MONITORING$$: boolean;
+declare const $$DEVELOP_VERSION$$: boolean;

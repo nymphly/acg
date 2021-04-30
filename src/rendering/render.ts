@@ -55,6 +55,10 @@ function renderContent(el: ACGElement): void {
     (<SVGElement>domRef).textContent = ''; // Clearing all content.
 
     if (Array.isArray(el.content)) {
+      if ($$DEVELOP_VERSION$$ && el.content.length > 50) { // TODO Hardcoded value?
+        console.warn(`Element "${el.name}" has more than 50 children. It can cause the noticeable performance bottleneck. Please, reorganize your SVG structure.`)
+      }
+
       if (el.sort) {
         el.content.sort(<SortingFunction<RawElementConfig>>el.sort);
       }

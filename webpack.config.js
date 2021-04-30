@@ -22,6 +22,7 @@ module.exports = {
   plugins: [
     new DefinePlugin({
       $$PERFORMANCE_MONITORING$$: JSON.stringify(true),
+      $$DEVELOP_VERSION$$: JSON.stringify(true),
     }),
   ],
   output: {
