@@ -1,7 +1,13 @@
+/**
+ * @param item
+ */
 export function isObject(item: unknown): boolean {
   return item instanceof Object && item.constructor === Object;
 }
 
+/**
+ * @param obj
+ */
 export function recursiveClone(obj: UntypedObjectOrArray): UntypedObjectOrArray {
   let res: UntypedObjectOrArray;
   if (Array.isArray(obj)) {

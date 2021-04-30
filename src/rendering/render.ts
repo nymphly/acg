@@ -27,20 +27,20 @@ function renderDom(el: ACGElement): void {
  */
 function renderAttrs(el: ACGElement): void {
   if (el.hasRenderState(RenderState.ATTRS)) {
-    const { domRef } = el;
+    const { domRef, attrs, name } = el;
     const { attributes } = <SVGElement>domRef;
 
     // Removing all attributes.
-    Object.entries(attributes).forEach(function attributesRemover([key]) {
+    Object.entries(attributes).forEach(([key]) => {
       domRef?.removeAttribute(key);
     });
 
     // Adding new ones.
-    Object.entries(el.attrs).forEach(function attributesAdder([key, value]) {
+    Object.entries(attrs).forEach(([key, value]) => {
       domRef?.setAttribute(key, String(value));
     });
 
-    domRef?.setAttribute(DATA_ACG_NAME, el.name);
+    domRef?.setAttribute(DATA_ACG_NAME, name);
 
     el.consistify(RenderState.ATTRS);
   }
@@ -51,25 +51,28 @@ function renderAttrs(el: ACGElement): void {
  */
 function renderContent(el: ACGElement): void {
   if (el.hasRenderState(RenderState.CONTENT)) {
-    const { domRef } = el;
+    const { domRef, content, sort, name, stage } = el;
     (<SVGElement>domRef).textContent = ''; // Clearing all content.
 
-    if (Array.isArray(el.content)) {
-      if ($$DEVELOP_VERSION$$ && el.content.length > 50) { // TODO Hardcoded value?
-        console.warn(`Element "${el.name}" has more than 50 children. It can cause the noticeable performance bottleneck. Please, reorganize your SVG structure.`)
+    if (Array.isArray(content)) {
+      if ($$DEVELOP_VERSION$$ && content.length > 50) {
+        // TODO Hardcoded "50" value?
+        console.warn(
+          `Element "${name}" has more than 50 children. It can cause the noticeable performance bottleneck. Please, reorganize your SVG structure.`,
+        );
       }
 
-      if (el.sort) {
-        el.content.sort(<SortingFunction<RawElementConfig>>el.sort);
+      if (sort) {
+        content.sort(<SortingFunction<RawElementConfig>>sort);
       }
 
-      el.content.forEach(function childAppender(childConfig) {
-        const childEl = <ACGElement>el.stage.find(childConfig.name); // By idea, can't be undefined.
+      content.forEach((childConfig) => {
+        const childEl = <ACGElement>stage.find(childConfig.name); // By idea, can't be undefined.
         render(childEl);
         domRef?.appendChild(<SVGElement>childEl.domRef);
       });
     } else {
-      (<SVGElement>domRef).textContent = String(el.content);
+      (<SVGElement>domRef).textContent = String(content);
     }
 
     el.consistify(RenderState.CONTENT);
