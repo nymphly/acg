@@ -4,6 +4,7 @@
  * DOM-rendering functions.
  */
 
+import { DEVELOP_VERSION } from '../acg';
 import { ACGElement } from '../elements';
 import { RenderState } from '../enums';
 
@@ -55,7 +56,7 @@ function renderContent(el: ACGElement): void {
     (<SVGElement>domRef).textContent = ''; // Clearing all content.
 
     if (Array.isArray(content)) {
-      if ($$DEVELOP_VERSION$$ && content.length > 50) {
+      if (DEVELOP_VERSION && content.length > 50) {
         // TODO Hardcoded "50" value?
         console.warn(
           `Element "${name}" has more than 50 children. It can cause the noticeable performance bottleneck. Please, reorganize your SVG structure.`,
@@ -81,7 +82,7 @@ function renderContent(el: ACGElement): void {
 
 /**
  * Default ACGElement renderer.
- * 
+ *
  * @param el - Element to be rendered.
  */
 export default function render(el: ACGElement): void {

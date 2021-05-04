@@ -3,11 +3,22 @@
  *
  * Acg default entry point. Probably will be replaced.
  */
+
 import { Pather } from './pather';
 import { Stage } from './stage';
-import {
-  svg
-} from './templates';
+import { svg } from './templates';
+
+declare global {
+  const $$PERFORMANCE_MONITORING$$: boolean;
+  const $$DEVELOP_VERSION$$: boolean;
+}
+
+// TODO Probably these values are set incorrectly here.
+export const PERFORMANCE_MONITORING: boolean =
+  $$PERFORMANCE_MONITORING$$ === undefined ? false : $$PERFORMANCE_MONITORING$$;
+
+export const DEVELOP_VERSION: boolean =
+  $$DEVELOP_VERSION$$ === undefined ? true : $$DEVELOP_VERSION$$;
 
 /**
  * Default stage creating function.
@@ -29,10 +40,10 @@ export function pather(): Pather {
 }
 
 /**
- * 
+ * Imitation of 'templates' namespace.
  */
 export const templates = {
-  get svg() {
+  get svg(): RawElementConfig {
     return svg();
-  }
+  },
 };

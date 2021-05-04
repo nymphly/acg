@@ -1,8 +1,14 @@
 /**
- * @param item
+ * @file
+ *
+ * Object-tools functionality.
  */
-export function isObject(item: unknown): boolean {
-  return item instanceof Object && item.constructor === Object;
+
+/**
+ * @param value
+ */
+export function isObject(value: unknown): value is Record<string, unknown> {
+  return value instanceof Object && value.constructor === Object;
 }
 
 /**

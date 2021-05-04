@@ -5,5 +5,5 @@
  * Compile-time defined variables.
  */
 
-declare const $$PERFORMANCE_MONITORING$$: boolean;
-declare const $$DEVELOP_VERSION$$: boolean;
+// declare const $$PERFORMANCE_MONITORING$$: boolean;
+// declare const $$DEVELOP_VERSION$$: boolean;

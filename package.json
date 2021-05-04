@@ -7,7 +7,7 @@
     "lint": "eslint '*/**/*.{js,ts}' --quiet --fix",
     "tsc": "tsc",
     "webpack": "webpack",
-    "test": "mocha -r ts-node/register src/**/*.spec.ts",
+    "test": "mocha -r ts-node/register --require src/testing-tools/CTInjection.ts src/**/*.spec.ts",
     "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" npm run test"
   },
   "author": "",
@@ -21,7 +21,7 @@
     "chai": "^4.3.0",
     "eslint": "^7.19.0",
     "eslint-config-prettier": "^7.2.0",
-    "eslint-plugin-jsdoc": "^32.2.0",
+    "eslint-plugin-jsdoc": "^32.3.4",
     "eslint-plugin-prettier": "^3.3.1",
     "mocha": "^8.3.0",
     "nyc": "^15.1.0",
@@ -31,6 +31,5 @@
     "typescript": "^4.1.5",
     "webpack": "^5.21.2",
     "webpack-cli": "^4.5.0"
-  },
-  "dependencies": {}
+  }
 }

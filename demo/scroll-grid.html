@@ -264,17 +264,17 @@
     const { xIndex, yIndex, xOffset, yOffset } = state;
 
 
-    if (e.deltaY < 0) {
-      console.log('minusingY');
-    } else {
-      console.log('plusingY');
-    }
+    // if (e.deltaY < 0) {
+    //   console.log('minusingY');
+    // } else {
+    //   console.log('plusingY');
+    // }
 
-    if (e.deltaX < 0) {
-      console.log('minusingX');
-    } else {
-      console.log('plusingX');
-    }
+    // if (e.deltaX < 0) {
+    //   console.log('minusingX');
+    // } else {
+    //   console.log('plusingX');
+    // }
 
     const dY = e.deltaY % CELL_HEIGHT;
     const newYOffset = state.yOffset - dY;
