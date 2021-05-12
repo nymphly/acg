@@ -283,7 +283,7 @@
     state.yOffset = newYOffset % CELL_HEIGHT - CELL_HEIGHT;
     state.xOffset = newXOffset % CELL_WIDTH - CELL_WIDTH;
 
-    renderState();
+    Promise.resolve().then(renderState);
   });
 
   container.addEventListener('touchmove', (e) => {
@@ -293,3 +293,4 @@
 </script>
 
 </html>
+

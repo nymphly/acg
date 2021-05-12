@@ -4,11 +4,11 @@
  * ACGElement implementaion.
  */
 
-import { Renderable } from '../disposable';
-import { RenderState } from '../enums';
-import { Factory } from '../factory';
-import { render } from '../rendering';
-import { Stage } from '../stage';
+import Factory from '../factory/Factory';
+import render from '../rendering/render';
+import Renderable from '../disposable/Renderable';
+import RenderState from '../enums/RenderState';
+import Stage from '../stage/Stage';
 
 export default class ACGElement extends Renderable {
   /**
@@ -167,7 +167,7 @@ export default class ACGElement extends Renderable {
   /**
    * Lightweight implementation of ACGElement's content modification
    * to avoid constructions like this:
-   *   element.content = [...element.content, newElement];
+   * element.content = [...element.content, newElement];
    *
    * This lightweight method should be used for the multiple element's content
    * modifications (factory case, for example) to avoid multiple putting content

@@ -4,9 +4,9 @@
  * Acg default entry point. Probably will be replaced.
  */
 
-import { Pather } from './pather';
-import { Stage } from './stage';
-import { svg } from './templates';
+import Pather from './pather/Pather';
+import Stage from './stage/Stage';
+import svg from './templates/svg';
 
 declare global {
   const $$PERFORMANCE_MONITORING$$: boolean;

@@ -12,7 +12,7 @@
  *   Read more: https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths.
  */
 
-import { ACGElement } from '../elements';
+import ACGElement from '../elements/ACGElement';
 
 export default class Pather {
   #rv = '';

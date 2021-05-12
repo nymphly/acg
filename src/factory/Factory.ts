@@ -4,10 +4,10 @@
  * Factory class implementation.
  */
 
-import { Renderable } from '../disposable';
-import { ACGElement } from '../elements';
-import { RenderState } from '../enums';
-import { Stage } from '../stage';
+import ACGElement from '../elements/ACGElement';
+import Renderable from '../disposable/Renderable';
+import RenderState from '../enums/RenderState';
+import Stage from '../stage/Stage';
 
 export default class Factory extends Renderable {
   #name: string;

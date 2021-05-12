@@ -5,8 +5,8 @@
  */
 
 import { DEVELOP_VERSION } from '../acg';
-import { ACGElement } from '../elements';
-import { RenderState } from '../enums';
+import ACGElement from '../elements/ACGElement';
+import RenderState from '../enums/RenderState';
 
 export const SVG_NS = 'http://www.w3.org/2000/svg';
 

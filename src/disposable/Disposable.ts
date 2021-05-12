@@ -4,7 +4,7 @@
  * Contains abstract Disposable class source code.
  */
 
-import { IDisposable } from '.';
+import IDisposable from './IDisposable';
 
 export default abstract class Disposable implements IDisposable {
   #isDisposed = false;

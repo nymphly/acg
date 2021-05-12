@@ -4,7 +4,7 @@
  * IRenderable interface description.
  */
 
-import { IDisposable } from '.';
+import IDisposable from './IDisposable';
 
 export default interface IRenderable extends IDisposable {
   render(): void;

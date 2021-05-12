@@ -4,9 +4,12 @@
  * Stage class implementation.
  */
 
-import { Renderable } from '../disposable';
-import { ACGElement } from '../elements';
-import { render } from '../rendering';
+// import { Renderable } from '../disposable';
+import Renderable from '../disposable/Renderable';
+import ACGElement from '../elements/ACGElement';
+import render from '../rendering/render';
+// import { ACGElement } from '../elements';
+// import { render } from '../rendering';
 
 export default class Stage extends Renderable {
   /**
