@@ -236,7 +236,7 @@ export default class Stage extends Renderable {
       this.#toRender.delete(key);
 
       // TODO maybe move it to renderer somehow?
-      if (el?.isStage) {
+      if (el && el.isStage) {
         if (this.#container) {
           this.#container.appendChild(<SVGElement>el.domRef);
         } else {

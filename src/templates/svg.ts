@@ -1,3 +1,5 @@
+import { SVG_NS } from '../rendering/render';
+
 /**
  *
  */
@@ -16,7 +18,7 @@ export default function svg() {
     tag: 'svg',
     name: 'Svg',
     attrs: {
-      xmlns: 'http://www.w3.org/2000/svg',
+      xmlns: SVG_NS,
       border: 0,
       width: '100%',
       height: '100%',
