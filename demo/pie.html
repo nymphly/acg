@@ -1,285 +1,313 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Title</title>
-    <link rel="stylesheet" href="palette.css" />
-    <style>
-      html,
-      body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
 
-      .selected {
-        fill: navy;
-      }
-
-      .labels {
-        fill: white;
-        font-size: 1.2vmin;
-        pointer-events: none;
-        text-shadow: black 1px 1px 0px;
-        text-anchor: middle;
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-      }
-
-      .label-selected {
-        fill: yellow;
-        font-size: 1.3vmin;
-      }
-
-      .grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-        width: 100%;
-        /* height: 100%; */
-        margin: 0;
-        padding: 0;
-      }
-
-      .tooltip {
-        position: absolute;
-        display: none;
-        border: 1px solid grey;
-        border-radius: 3px;
-        background-color: white;
-        font-family: Verdana, Geneva, Tahoma, sans-serif;
-        font-size: 2vmin;
-        color: navy;
-        padding: 10px;
-        pointer-events: none;
-        text-shadow: black 1px 1px 0px;
-      }
-    </style>
-    <script src="./../dist/bundle.js"></script>
-  </head>
-
-  <body>
-    <h2 id="title">Rendering...</h2>
-    <div id="container" class="grid">
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-    </div>
-
-    <div class="tooltip"></div>
-  </body>
-
-  <script>
-    let NOW = Date.now();
-    const stages = [];
-    const dataSets = [];
-
-    function getRandomData() {
-      return Array.from({ length: 7 }, () => Math.floor(Math.random() * 20) + 5);
-      // return Array.from({ length: 7 }, () => 1);
+<head>
+  <meta charset="UTF-8" />
+  <title>PURE ACG PIE</title>
+  <link rel="stylesheet" href="palette.css" />
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
     }
 
-    const container = document.querySelector('#container');
+    .selected {
+      fill: navy;
+    }
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      entries.forEach((entry, index) => {
-        const stage = stages[index];
-        const dataSet = dataSets[index];
+    .labels {
+      fill: white;
+      font-size: 1.2vmin;
+      pointer-events: none;
+      text-shadow: black 1px 1px 0px;
+      text-anchor: middle;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+    }
 
-        if (entry.contentBoxSize) {
-          // Firefox implements `contentBoxSize` as a single content rect, rather than an array.
-          const contentBoxSize = Array.isArray(entry.contentBoxSize)
-            ? entry.contentBoxSize[0]
-            : entry.contentBoxSize;
+    .label-selected {
+      fill: yellow;
+      font-size: 1.3vmin;
+    }
 
-          Promise.resolve().then(() => {
-            renderStage(stage, dataSet, contentBoxSize.inlineSize, contentBoxSize.blockSize);
-          });
-        } else {
-          Promise.resolve().then(() => {
-            renderStage(stage, dataSet, entry.contentRect.width, entry.contentRect.height);
-          });
-        }
-      });
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+      width: 100%;
+      /* height: 100%; */
+      margin: 0;
+      padding: 0;
+    }
 
-      const duration = Date.now() - NOW;
-      document.querySelector('#title').textContent = `First load render time: ${duration}ms`;
+    .tooltip {
+      position: absolute;
+      display: none;
+      border: 1px solid grey;
+      border-radius: 3px;
+      background-color: white;
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      font-size: 2vmin;
+      color: navy;
+      padding: 10px;
+      pointer-events: none;
+      text-shadow: black 1px 1px 0px;
+    }
+  </style>
+  <script src="./../dist/bundle.js"></script>
+</head>
+
+<body>
+  <h2 id="title">Rendering...</h2>
+  <div id="container" class="grid">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+
+  <div class="tooltip"></div>
+</body>
+
+<script>
+  let NOW = Date.now();
+  const stages = [];
+  const dataSets = [];
+  const bounds = [];
+  const pather = acg.pather();
+
+  let startAngle = -Math.PI / 2 + 0.05;
+
+  function getRandomData() {
+    return Array.from({ length: 7 }, () => Math.floor(Math.random() * 20) + 5);
+    // return Array.from({ length: 7 }, () => 1);
+  }
+
+  const container = document.querySelector('#container');
+
+  const resizeObserver = new ResizeObserver((entries) => {
+    entries.forEach((entry, index) => {
+      const stage = stages[index];
+      const dataSet = dataSets[index];
+
+      if (entry.contentBoxSize) {
+        // Firefox implements `contentBoxSize` as a single content rect, rather than an array.
+        const contentBoxSize = Array.isArray(entry.contentBoxSize)
+          ? entry.contentBoxSize[0]
+          : entry.contentBoxSize;
+
+        bounds[index] = {
+          width: contentBoxSize.inlineSize,
+          height: contentBoxSize.blockSize
+        };
+
+        Promise.resolve().then(() => {
+          renderStage(stage, dataSet, bounds[index]);
+        });
+      } else {
+        bounds[index] = {
+          width: entry.contentRect.width,
+          height: entry.contentRect.height
+        };
+
+        Promise.resolve().then(() => {
+          renderStage(stage, dataSet, bounds);
+        });
+      }
     });
 
-    function createStage(container) {
-      const data = getRandomData();
-      const sum = data.reduce((acc, curr) => acc + curr, 0);
-      const slicesData = data.map((value, index) => {
-        return {
-          value,
-          index,
-          weight: value / sum,
-          name: `Point${index}: ${value}`,
-        };
-      });
+    const duration = Date.now() - NOW;
+    document.querySelector('#title').textContent = `First load render time: ${duration}ms`;
+  });
 
-      dataSets.push(slicesData);
+  function createStage(container) {
+    const data = getRandomData();
+    const sum = data.reduce((acc, curr) => acc + curr, 0);
+    const slicesData = data.map((value, index) => {
+      return {
+        value,
+        index,
+        weight: value / sum,
+        name: `Point${index}: ${value}`,
+      };
+    });
 
-      const config = acg.templates.svg;
-      config.content = [
-        ...config.content,
-        {
-          tag: 'g',
-          name: 'Labels-Layer',
-        },
-      ];
-      const stage = acg.create(config);
-      stage.container = container;
+    dataSets.push(slicesData);
 
-      return stage;
-    }
+    const config = acg.templates.svg;
+    config.content = [
+      ...config.content,
+      {
+        tag: 'g',
+        name: 'Labels-Layer',
+      },
+    ];
+    const stage = acg.create(config);
+    stage.container = container;
 
-    Array.from(container.children).forEach((div) => {
-      const stage = createStage(div);
-      stages.push(stage);
+    return stage;
+  }
 
-      resizeObserver.observe(div);
+  Array.from(container.children).forEach((div) => {
+    const stage = createStage(div);
+    stages.push(stage);
 
-      div.addEventListener('click', (e) => {
-        const { target } = e;
-        if (target.dataset.acgPointType === 'slice') {
-          const { classList } = target;
-          if (classList.contains('selected')) {
-            classList.remove('selected');
+    resizeObserver.observe(div);
+
+    div.addEventListener('click', (e) => {
+      const { target } = e;
+      if (target.dataset.acgPointType === 'slice') {
+        const { classList } = target;
+        if (classList.contains('selected')) {
+          classList.remove('selected');
+        } else {
+          classList.add('selected');
+        }
+
+        const svg = target.closest('svg');
+        const { relatedLabel } = target.dataset;
+        const label = svg.querySelector(`text[data-acgName="${relatedLabel}"]`);
+        if (label) {
+          if (label.classList.contains('label-selected')) {
+            label.classList.remove('label-selected');
           } else {
-            classList.add('selected');
-          }
-
-          const svg = target.closest('svg');
-          const { relatedLabel } = target.dataset;
-          const label = svg.querySelector(`text[data-acgName="${relatedLabel}"]`);
-          if (label) {
-            if (label.classList.contains('label-selected')) {
-              label.classList.remove('label-selected');
-            } else {
-              label.classList.add('label-selected');
-            }
+            label.classList.add('label-selected');
           }
         }
-      });
-
-      div.addEventListener('mousemove', (e) => {
-        const { target } = e;
-        const tooltip = document.querySelector('.tooltip');
-
-        if (target.dataset.acgPointType === 'slice') {
-          requestAnimationFrame(() => {
-            tooltip.style.display = 'block';
-            tooltip.style.left = `${e.clientX + 5}px`;
-            tooltip.style.top = `${e.clientY + 5}px`;
-
-            const style = window.getComputedStyle(target);
-            tooltip.style.color = style.fill;
-            tooltip.textContent = target.dataset.tooltipText;
-          });
-        } else {
-          requestAnimationFrame(() => {
-            tooltip.style.display = 'none';
-          });
-        }
-      });
+      }
     });
 
-    function renderStage(stage, dataSet, width, height) {
-      const rootLayer = stage.find('Root-Layer');
-      const labelsLayer = stage.find('Labels-Layer');
+    div.addEventListener('mousemove', (e) => {
+      const { target } = e;
+      const tooltip = document.querySelector('.tooltip');
 
-      const pather = acg.pather();
+      if (target.dataset.acgPointType === 'slice') {
+        requestAnimationFrame(() => {
+          tooltip.style.display = 'block';
+          tooltip.style.left = `${e.clientX + 5}px`;
+          tooltip.style.top = `${e.clientY + 5}px`;
 
-      const slicesFactory = rootLayer.factory('Slices-Factory', {
-        tag: 'path',
-        attrs: {
-          stroke: 'white',
-          fill: 'none',
-          'data-acgPointType': 'slice',
-        },
+          const style = window.getComputedStyle(target);
+          tooltip.style.color = style.fill;
+          tooltip.textContent = target.dataset.tooltipText;
+        });
+      } else {
+        requestAnimationFrame(() => {
+          tooltip.style.display = 'none';
+        });
+      }
+    });
+  });
+
+  function renderStage(stage, dataSet, bounds) {
+    const { width, height } = bounds;
+    const rootLayer = stage.find('Root-Layer');
+    const labelsLayer = stage.find('Labels-Layer');
+
+    const slicesFactory = rootLayer.factory('Slices-Factory', {
+      tag: 'path',
+      attrs: {
+        stroke: 'white',
+        fill: 'none',
+        'data-acgPointType': 'slice',
+      },
+    });
+
+    const labelsFactory = labelsLayer.factory('Labels-Factory', {
+      tag: 'text',
+      attrs: {
+        class: 'labels',
+        'data-acgPointType': 'label',
+      },
+    });
+
+    slicesFactory.clear();
+    labelsFactory.clear();
+
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = 0.9 * Math.min(centerX, centerY);
+
+    let start = startAngle;
+    let weightCurrSum = 0;
+    dataSet.forEach((d, index) => {
+      pather.clear();
+
+      const path = slicesFactory.add();
+      path.attrs = {
+        ...path.attrs,
+        class: `acg-palette-${index + 1}`,
+        'data-relatedLabel': `Labels-Layer-Labels-Factory-${index + 1}`,
+        'data-tooltipText': d.name,
+      };
+
+      const offsetX = Math.cos(start) * radius;
+      const offsetY = Math.sin(start) * radius;
+
+      const destX = centerX + offsetX;
+      const destY = centerY + offsetY;
+
+      weightCurrSum += d.weight;
+      const alpha1 = start;
+
+      start = startAngle + 2 * Math.PI * weightCurrSum;
+      const alpha2 = start;
+
+      const labelOffsetX = Math.cos((alpha2 + alpha1) / 2) * radius;
+      const labelOffsetY = Math.sin((alpha2 + alpha1) / 2) * radius;
+
+      const label = labelsFactory.add();
+      label.attrs = {
+        ...label.attrs,
+        x: centerX + labelOffsetX / 1.5,
+        y: centerY + labelOffsetY / 1.5,
+      };
+      label.content = d.name;
+
+      const nextOffsetX = Math.cos(start) * radius;
+      const nextOffsetY = Math.sin(start) * radius;
+
+      pather
+        .moveTo(centerX, centerY)
+        .lineTo(destX, destY)
+        .arcTo(radius, radius, 0, 0, 1, centerX + nextOffsetX, centerY + nextOffsetY)
+        .close()
+        .applyTo(path);
+    });
+
+    stage.render();
+  }
+
+  const redraw = () => {
+
+    if (bounds.length) {
+      startAngle += 0.05;
+      stages.forEach((stage, index) => {
+        renderStage(stage, dataSets[index], bounds[index]);
       });
-
-      const labelsFactory = labelsLayer.factory('Labels-Factory', {
-        tag: 'text',
-        attrs: {
-          class: 'labels',
-          'data-acgPointType': 'label',
-        },
-      });
-
-      slicesFactory.clear();
-      labelsFactory.clear();
-
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const radius = 0.9 * Math.min(centerX, centerY);
-
-      const START = -Math.PI / 2;
-      let start = START;
-      let weightCurrSum = 0;
-      dataSet.forEach((d, index) => {
-        pather.clear();
-
-        const path = slicesFactory.add();
-        path.attrs = {
-          ...path.attrs,
-          class: `acg-palette-${index + 1}`,
-          'data-relatedLabel': `Labels-Layer-Labels-Factory-${index + 1}`,
-          'data-tooltipText': d.name,
-        };
-
-        const offsetX = Math.cos(start) * radius;
-        const offsetY = Math.sin(start) * radius;
-
-        const destX = centerX + offsetX;
-        const destY = centerY + offsetY;
-
-        weightCurrSum += d.weight;
-        const alpha1 = start;
-
-        start = START + 2 * Math.PI * weightCurrSum;
-        const alpha2 = start;
-
-        const labelOffsetX = Math.cos((alpha2 + alpha1) / 2) * radius;
-        const labelOffsetY = Math.sin((alpha2 + alpha1) / 2) * radius;
-
-        const label = labelsFactory.add();
-        label.attrs = {
-          ...label.attrs,
-          x: centerX + labelOffsetX / 1.5,
-          y: centerY + labelOffsetY / 1.5,
-        };
-        label.content = d.name;
-
-        const nextOffsetX = Math.cos(start) * radius;
-        const nextOffsetY = Math.sin(start) * radius;
-
-        pather
-          .moveTo(centerX, centerY)
-          .lineTo(destX, destY)
-          .arcTo(radius, radius, 0, 0, 1, centerX + nextOffsetX, centerY + nextOffsetY)
-          .close()
-          .applyTo(path);
-      });
-
-      stage.render();
     }
-  </script>
+
+    requestAnimationFrame(redraw);
+  }
+  redraw();
+
+</script>
+
 </html>

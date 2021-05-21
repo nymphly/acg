@@ -48,18 +48,34 @@ function renderAttrs(el: ACGElement): void {
     const { attributes } = <SVGElement>domRef;
 
     // Removing all attributes.
-    Object.entries(attributes).forEach(([key]) => {
+    for (const key in attributes) {
       domRef.removeAttribute(key);
-    });
+    }
 
     // Adding new ones.
-    Object.entries(attrs).forEach(([key, value]) => {
-      domRef.setAttribute(key, String(value));
-    });
+    for (const key in attrs) {
+      domRef.setAttribute(key, String(attrs[key]));
+    }
 
     domRef.setAttribute(DATA_ACG_NAME, name);
 
     el.consistify(RenderState.ATTRS);
+  }
+}
+
+/**
+ * Sorts ACGElement's content.
+ *
+ * @param el - ACGElement to sort its content.
+ */
+function renderSort(el: ACGElement): void {
+  const { domRef, content, sort } = el;
+
+  if (el.hasRenderState(RenderState.SORT) && domRef) {
+    if (Array.isArray(content) && sort) {
+      content.sort(<SortingFunction<RawElementConfig>>sort);
+    }
+    el.consistify(RenderState.SORT);
   }
 }
 
@@ -69,7 +85,7 @@ function renderAttrs(el: ACGElement): void {
  * @param el - ACGElement to render content to.
  */
 function renderContent(el: ACGElement): void {
-  const { domRef, content, sort, name, stage } = el;
+  const { domRef, content, name, stage } = el;
 
   /*
     Since el.domRef is nullable for disposing purposes,
@@ -80,11 +96,9 @@ function renderContent(el: ACGElement): void {
       domRef === null || domRef === void 0 ? void 0 : domRef.appendChild(childEl.domRef);
     
     This check lingers for all the iterations. That's why
-    we just move domRef existance to a single initial condition.
+    we just move domRef existence to a single initial condition.
    */
   if (el.hasRenderState(RenderState.CONTENT) && domRef) {
-    (<SVGElement>domRef).textContent = ''; // Clearing all content.
-
     if (Array.isArray(content)) {
       if (DEVELOP_VERSION && content.length > 50) {
         // TODO Hardcoded "50" value?
@@ -93,16 +107,16 @@ function renderContent(el: ACGElement): void {
         );
       }
 
-      // TODO Move it to the separated RenderState.
-      if (sort) {
-        content.sort(<SortingFunction<RawElementConfig>>sort);
-      }
-
       content.forEach((childConfig) => {
         const childEl = <ACGElement>stage.find(childConfig.name); // By idea, can't be undefined.
         render(childEl);
         domRef.appendChild(<SVGElement>childEl.domRef);
       });
+
+      // Clearing remaining elements. TODO Describe!
+      for (let i = 0; i < domRef.childElementCount - content.length; i++) {
+        domRef.children[i].remove();
+      }
     } else {
       (<SVGElement>domRef).textContent = String(content);
     }
@@ -120,6 +134,7 @@ export default function render(el: ACGElement): void {
   if (!el.isDisposed) {
     renderDom(el);
     renderAttrs(el);
+    renderSort(el);
     renderContent(el);
   }
 }

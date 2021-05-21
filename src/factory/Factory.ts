@@ -16,7 +16,7 @@ export default class Factory extends Renderable {
   #pool: RawElementConfig[] = [];
   #stage: Nullable<Stage> = null;
 
-  #curentElementIndex = 0;
+  #currentElementIndex = 0;
 
   constructor(
     name: string,
@@ -33,7 +33,7 @@ export default class Factory extends Renderable {
   }
 
   get nextName(): string {
-    return `${this.#parentElementName}-${this.#name}-${this.#curentElementIndex}`;
+    return `${this.#parentElementName}-${this.#name}-${this.#currentElementIndex}`;
   }
 
   use(index: number): RawElementConfig {
@@ -53,7 +53,7 @@ export default class Factory extends Renderable {
   }
 
   public add(attrs?: RawElementAttrs): ACGElement {
-    const index = this.#curentElementIndex++;
+    const index = this.#currentElementIndex++;
     const parent: ACGElement | undefined = this.#stage?.find(this.#parentElementName);
     if (parent) {
       const el: RawElementConfig = this.use(index);
@@ -67,6 +67,7 @@ export default class Factory extends Renderable {
       parent.add(el);
 
       const element = <ACGElement>this.#stage?.find(el.name);
+      element.parentFactory = this;
       element.invalidate(RenderState.ATTRS);
       return element;
     }
@@ -76,13 +77,16 @@ export default class Factory extends Renderable {
   }
 
   public clear(): void {
-    this.#curentElementIndex = 0;
-    const parent: ACGElement | undefined = this.#stage?.find(this.#parentElementName);
-    if (parent && this.#pool.length) {
-      // pool.length MUST guarantee that parent.content is an array.
-      parent.content = (parent.content as RawElementConfig[]).filter(
-        (el) => !this.#pool.includes(el),
-      );
+    this.#currentElementIndex = 0;
+    if (this.#stage) {
+      const parent: ACGElement | undefined = this.#stage.find(this.#parentElementName);
+      if (parent && this.#pool.length) {
+        const stage: Stage = this.#stage;
+        // pool.length MUST guarantee that parent.content is an array.
+        parent.content = (parent.content as RawElementConfig[]).filter(
+          (parentRawConfig) => stage.find(parentRawConfig.name)?.parentFactory !== this,
+        );
+      }
     }
   }
 

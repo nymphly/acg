@@ -25,9 +25,9 @@ export function recursiveClone(obj: UntypedObjectOrArray): UntypedObjectOrArray 
     }
   } else if (isObject(obj)) {
     res = {};
-    Object.keys(obj).forEach((key) => {
+    for (const key in obj) {
       res[key] = recursiveClone(<UntypedObjectOrArray>obj[key]);
-    });
+    }
   } else {
     return obj;
   }

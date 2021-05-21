@@ -1,7 +1,7 @@
 /**
  * @file
  *
- * ACGElement implementaion.
+ * ACGElement implementation.
  */
 
 import Factory from '../factory/Factory';
@@ -47,9 +47,16 @@ export default class ACGElement extends Renderable {
   #sort: Nullable<SortingFunction<RawElementConfig>> = null;
 
   /**
-   * Factries storage.
+   * Factories storage.
    */
   #factories: Map<string, Factory> = new Map();
+
+  /**
+   * Field that must be set if AVGElement is created by factory.
+   * Used by factory itself to correctly clear elements belonging
+   * to factory.
+   */
+  parentFactory: Nullable<Factory> = null;
 
   constructor(stage: Stage, rawConfig: RawElementConfig, parent: Nullable<string> = null) {
     super();
@@ -118,7 +125,7 @@ export default class ACGElement extends Renderable {
       this.#rawConfig.content = newContent;
     }
 
-    this.invalidate(RenderState.CONTENT);
+    this.invalidate(RenderState.SORT | RenderState.CONTENT);
   }
 
   public get domRef(): Nullable<SVGElement> {
@@ -143,6 +150,7 @@ export default class ACGElement extends Renderable {
 
   public set sort(sortingFn: Nullable<SortingFunction<RawElementConfig>>) {
     this.#sort = sortingFn;
+    this.invalidate(RenderState.SORT | RenderState.CONTENT);
   }
 
   hasRenderState(state: RenderState): boolean {
