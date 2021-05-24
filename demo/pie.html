@@ -296,14 +296,12 @@
   }
 
   const redraw = () => {
-
     if (bounds.length) {
       startAngle += 0.05;
       stages.forEach((stage, index) => {
         renderStage(stage, dataSets[index], bounds[index]);
       });
     }
-
     requestAnimationFrame(redraw);
   }
   redraw();

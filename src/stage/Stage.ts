@@ -152,7 +152,7 @@ export default class Stage extends Renderable {
 
       if (parentName === null) {
         /*
-          This is a little bit hacky: this.find(name) basicly puts a very root (SVG)
+          This is a little bit hacky: this.find(name) basically puts a very root (SVG)
           element to this.#toRender and it renders all children on first rendering.
 
           The hack is in the fact that children become rendered not because 
