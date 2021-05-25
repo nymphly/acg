@@ -100,11 +100,11 @@ export default class ACGElement extends Renderable {
   }
 
   public get attrs(): Record<string, NumberOrString> {
-    return { ...this.#rawConfig.attrs };
+    return this.#rawConfig.attrs || {};
   }
 
   public set attrs(newAttrs: Record<string, NumberOrString>) {
-    this.#rawConfig.attrs = { ...newAttrs };
+    this.#rawConfig.attrs = newAttrs;
     this.invalidate(RenderState.ATTRS);
   }
 
@@ -117,7 +117,7 @@ export default class ACGElement extends Renderable {
     this.#stage.backupContent(this);
 
     if (Array.isArray(newContent)) {
-      this.#rawConfig.content = [...newContent];
+      this.#rawConfig.content = newContent;
       this.#rawConfig.content.forEach((config) => {
         this.#stage.parseConfig(config, this.name);
       });

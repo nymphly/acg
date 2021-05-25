@@ -58,11 +58,12 @@ export default class Factory extends Renderable {
     if (parent) {
       const el: RawElementConfig = this.use(index);
 
-      // This will merge default attributes with incoming ones. Probably should redefine.
-      el.attrs = {
-        ...el.attrs,
-        ...attrs,
-      };
+      // This will merge default attributes with incoming ones. Probably should redefine instead of merging.
+      Object.assign(el.attrs, attrs);
+      // el.attrs = {
+      //   ...el.attrs,
+      //   ...attrs,
+      // };
 
       parent.add(el);
 
